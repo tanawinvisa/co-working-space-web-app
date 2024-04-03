@@ -14,12 +14,12 @@ const { protect, authorize } = require("../middleware/auth");
 router
   .route("/")
   .get(getWorkspaces)
-  .post(protect, authorize("admin","user"), createWorkspace);
+  .post(protect, authorize("admin"), createWorkspace);
 
 router
   .route("/:id")
   .get(getWorkspace)
-  .put(protect, authorize("admin","user"), updateWorkspace)
-  .delete(protect, authorize("admin","user"), deleteWorkspace);
+  .put(protect, authorize("admin"), updateWorkspace)
+  .delete(protect, authorize("admin"), deleteWorkspace);
 
 module.exports = router;
