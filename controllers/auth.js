@@ -103,3 +103,13 @@ exports.getMe = async (req, res, next) => {
   });
 };
 
+// @desc    Logout user
+// @route   GET /api/v1/auth/logout
+// @access  Private
+exports.logout = async (req, res, next) => {
+  // Clear the token from cookies
+  res.clearCookie('token');
+
+  res.status(200).json({ success: true, msg: 'User logged out successfully' });
+};
+
