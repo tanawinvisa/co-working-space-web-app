@@ -167,7 +167,7 @@ exports.deleteWorkspace = async (req, res, next) => {
         message: `No workspace with the id of ${req.params.id}`,
       });
     }
-    await workspace.remove();
+    await workspace.deleteOne();
     res.status(200).json({
       success: true,
       data: {},
