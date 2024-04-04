@@ -117,6 +117,18 @@ exports.createReservation = async (req, res, next) => {
       });
     }
 
+    // Check if the workspace is already reserved on the given date and time
+    const existingReservation = await Reservation.findOne({
+      workspace_id: workspace_id,
+      date: date,
+    });
+    if (existingReservation) {
+      return res.status(400).json({
+        success: false,
+        message: "The workspace is already reserved on the given date and time",
+      });
+    }
+
     // Create the reservation
     const reservation = await Reservation.create({
       user_id: req.user.id,
