@@ -21,11 +21,11 @@ router
 
 router
   .route("/:id")
-  .get(protect, authorize("admin"), getReservation)
+  .get(protect, authorize("admin", "user"), getReservation)
   .put(protect, authorize("admin", "user"), updateReservation)
   .delete(protect, authorize("admin", "user"), deleteReservation);
 
 // Route to get reservations by user ID
-router.get("/user/:userId", protect, authorize("admin"), getReservationsByUserId);
+router.get("/user/:userId", protect, authorize("admin","user"), getReservationsByUserId);
 
 module.exports = router;

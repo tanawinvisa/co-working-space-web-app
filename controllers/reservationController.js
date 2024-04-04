@@ -6,6 +6,12 @@ const Workspace = require("../models/WorkSpace");
 // @access  Private
 exports.getReservations = async (req, res, next) => {
   try {
+    if (req.user.role !== "admin" ) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to access this resource",
+      });
+    }
     const reservations = await Reservation.find();
     res.status(200).json({
       success: true,
@@ -23,18 +29,18 @@ exports.getReservations = async (req, res, next) => {
 
 // @desc    Get reservations by user ID
 // @route   GET /api/v1/reservations/user/:userId
-// @access  Private (admin only)
+// @access  Private
 exports.getReservationsByUserId = async (req, res, next) => {
   try {
     // Check if the requesting user is an admin
-    if (req.user.role !== "admin") {
+    if (!(req.user.role === "admin" || req.user.id === req.params.userId)) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to access this resource",
       });
     }
 
-    const reservations = await Reservation.find({ user: req.params.userId });
+    const reservations = await Reservation.find({ user_id: req.params.userId });
     res.status(200).json({
       success: true,
       count: reservations.length,
@@ -148,7 +154,7 @@ exports.updateReservation = async (req, res, next) => {
     }
 
     // Ensure the user making the request owns the reservation
-    if (reservation.user.toString() !== req.user.id) {
+    if (reservation.user_id.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this reservation",
@@ -199,7 +205,7 @@ exports.deleteReservation = async (req, res, next) => {
     }
 
     // Ensure the user making the request owns the reservation
-    if (reservation.user.toString() !== req.user.id) {
+    if (!(reservation.user_id.toString() === req.user.id || req.user.role === "admin")) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this reservation",
@@ -214,7 +220,7 @@ exports.deleteReservation = async (req, res, next) => {
       });
     }
 
-    await reservation.remove();
+    await reservation.deleteOne();
 
     res.status(200).json({
       success: true,
