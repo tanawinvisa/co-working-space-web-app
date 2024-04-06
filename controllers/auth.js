@@ -113,3 +113,33 @@ exports.logout = async (req, res, next) => {
   res.status(200).json({ success: true, msg: 'User logged out successfully' });
 };
 
+
+
+const { generateOTP, sendEmail } = require('../utils/email');
+
+
+// Route to send OTP for email verification
+exports.sendVerificationOTP = async (req, res, next) => {
+  try {
+    console.log("w123",req.user)
+    const {email} = req.user;
+    console.log(email)
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const otp = generateOTP();
+    await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${otp}`); // Implement sendEmail function
+
+    // You can save the OTP in the user document for comparison later if needed
+    user.otp = otp;
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'OTP sent successfully', otp });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Unable to send OTP' });
+  }
+};
