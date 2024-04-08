@@ -85,12 +85,14 @@ UserSchema.methods.generateResetToken = async function () {
   // Generate a random string
   const resetToken = crypto.randomBytes(20).toString('hex');
   console.log("resetToken", resetToken);
+  const salt = await bcrypt.genSalt(10);
+  const hashedResetToken = await bcrypt.hash(resetToken, salt);
 
   // Set the reset token and its expiration time in the update object
   const update = {
     $set: {
       resetPasswordToken: {
-        token: resetToken,
+        token: hashedResetToken,
         expiresAt: Date.now() + 5 * 60 * 1000, // Token expires in 5 minutes
       }
     }
@@ -104,7 +106,13 @@ UserSchema.methods.generateResetToken = async function () {
   );
 
   // Return the generated reset token
+  // console.log("hashedResetToken", hashedResetToken)
   return resetToken;
+};
+
+// Match user entered password to hashed password in database
+UserSchema.methods.matchResetPasswordToken = async function (enteredToken) {
+  return await bcrypt.compare(enteredToken, this.resetPasswordToken.token);
 };
 
 

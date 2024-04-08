@@ -151,7 +151,7 @@ exports.loginWithGoogle = async (req, res) => {
     //   <h1> welcome ${user_data.name}</h1>
     //   <img src="${user_data.picture}" alt="user_image" />
     // `);
-    console.log(user_data);
+    // console.log(user_data);
   } catch (error) {
     console.log(error.message);
     res.sendStatus(500);
@@ -214,7 +214,7 @@ const { generateOTP, sendEmail } = require('../utils/email');
 exports.sendVerificationOTP = async (req, res, next) => {
   try {
     const {email} = req.user;
-    console.log(email)
+    // console.log(email)
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -225,7 +225,7 @@ exports.sendVerificationOTP = async (req, res, next) => {
     await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${otp}`); // Implement sendEmail function
 
     // You can save the OTP in the user document for comparison later if needed
-    console.log(user)
+    // console.log(user)
     const otpObject = {value: otp, expiresAt: new Date(Date.now() + 300000)}; // OTP expires in 5 minutes
     await User.updateOne({ email }, { otp: otpObject });
     
@@ -241,7 +241,7 @@ exports.sendVerificationOTP = async (req, res, next) => {
 // @access  Private
 exports.verifyOTP = async (req, res, next) => {
   try {
-    console.log(req.user)
+    // console.log(req.user)
     const { otp } = req.body;
     const { email } = req.user;
 
@@ -277,9 +277,9 @@ exports.forgotPassword = async (req, res, next) => {
     }
 
     const resetToken = await user.generateResetToken(email); // Implement this function
-    console.log(resetToken);
+    // console.log(resetToken);
 
-    const resetUrl = `http://localhost:5000/api/v1/auth/resetPassword?token=${resetToken}&email=${encodeURIComponent(email)}`;
+    const resetUrl = `http://localhost:5000/api/v1/auth/resetPassword?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(email)}`;
     await sendEmail(email, 'Password Reset Request', `Click here to reset your password: ${resetUrl}`);
 
     res.status(200).json({ success: true, message: 'Password reset link sent to email' });
@@ -294,21 +294,26 @@ exports.forgotPassword = async (req, res, next) => {
 // @access  Public
 exports.resetPassword = async (req, res, next) => {
   try {
-    const token = req.query.token;
+    const token = decodeURIComponent(req.query.token);
     const email = decodeURIComponent(req.query.email);
-    console.log(token,email)
+    // console.log(token,email)
     const { newPassword } = req.body;
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({ success: false, message: 'Invalid or expired token' });
     }
-    if(user.resetPasswordToken.token !== token || user.resetPasswordToken.expiresAt < new Date()) {
+    // Check if password matches
+    const isMatch = await user.matchResetPasswordToken(token);
+
+    if (!isMatch) {
+      return res.status(400).json({ success: false, msg: "Invalid token" });
+    }
+    if(user.resetPasswordToken.expiresAt < new Date()) {
       return res.status(400).json({ success: false, message: 'Invalid or expired token' });
     }
 
     user.password = newPassword;
-    user.resetPasswordToken.token = crypto.randomBytes(20).toString('hex');
     user.resetPasswordToken.expiresAt = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
     await user.save();
 
