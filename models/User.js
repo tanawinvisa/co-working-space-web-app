@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require('crypto');
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -32,7 +33,20 @@ const UserSchema = new mongoose.Schema({
     select: false,
   },
   otp: {
-    type: String,
+    value: {
+      type: String,
+    },
+    expiresAt: {
+      type: Date,
+    },
+  },
+  resetPasswordToken: {
+    token: {
+      type: String,
+    },
+    expiresAt: {
+      type: Date,
+    },
   },
   isVerified: {
     type: Boolean,
@@ -65,5 +79,33 @@ UserSchema.methods.getSignedJwtToken = function () {
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Generate password reset token
+UserSchema.methods.generateResetToken = async function () {
+  // Generate a random string
+  const resetToken = crypto.randomBytes(20).toString('hex');
+  console.log("resetToken", resetToken);
+
+  // Set the reset token and its expiration time in the update object
+  const update = {
+    $set: {
+      resetPasswordToken: {
+        token: resetToken,
+        expiresAt: Date.now() + 5 * 60 * 1000, // Token expires in 5 minutes
+      }
+    }
+  };
+
+  // Update the user document with the reset token
+  await this.model('User').findOneAndUpdate(
+    { _id: this._id },
+    update,
+    { new: true } // To return the updated document
+  );
+
+  // Return the generated reset token
+  return resetToken;
+};
+
 
 module.exports = mongoose.model("User", UserSchema);

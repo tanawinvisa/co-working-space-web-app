@@ -33,18 +33,6 @@ app.use("/api/v1/workspaces", workspaces); // Mount workspace route file
 app.use("/api/v1/reservations", reservations); // Mount reservation route file
 
 
-const utils = require ('./utils');
-
-app.get ('/auth', async (req, res) => {
-  try {
-    res.redirect (utils.request_get_auth_code_url);
-  } catch (error) {
-    res.sendStatus (500);
-    console.log (error.message);
-  }
-});
-
-
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
