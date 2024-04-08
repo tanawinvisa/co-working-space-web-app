@@ -64,6 +64,9 @@ const UserSchema = new mongoose.Schema({
 
 // Encrypt password using bcrypt
 UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
@@ -80,40 +83,25 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Generate password reset token
-UserSchema.methods.generateResetToken = async function () {
-  // Generate a random string
+// Generate and hash password reset token
+UserSchema.methods.getResetPasswordToken = function () {
+  // Generate token
   const resetToken = crypto.randomBytes(20).toString('hex');
-  console.log("resetToken", resetToken);
-  const salt = await bcrypt.genSalt(10);
-  const hashedResetToken = await bcrypt.hash(resetToken, salt);
 
-  // Set the reset token and its expiration time in the update object
-  const update = {
-    $set: {
-      resetPasswordToken: {
-        token: hashedResetToken,
-        expiresAt: Date.now() + 5 * 60 * 1000, // Token expires in 5 minutes
-      }
-    }
+  // Hash token and set to resetPasswordToken field
+  this.resetPasswordToken = {
+    token: crypto.createHash('sha256').update(resetToken).digest('hex'),
+    expiresAt: Date.now() + 10 * 60 * 1000 // 10 minute expire
   };
 
-  // Update the user document with the reset token
-  await this.model('User').findOneAndUpdate(
-    { _id: this._id },
-    update,
-    { new: true } // To return the updated document
-  );
-
-  // Return the generated reset token
-  // console.log("hashedResetToken", hashedResetToken)
+  // Return plain token
   return resetToken;
 };
 
-// Match user entered password to hashed password in database
-UserSchema.methods.matchResetPasswordToken = async function (enteredToken) {
-  return await bcrypt.compare(enteredToken, this.resetPasswordToken.token);
+// Match resetPasswordToken from the user input with the hashed one in database
+UserSchema.methods.matchResetPasswordToken = function (enteredToken) {
+  const hashedToken = crypto.createHash('sha256').update(enteredToken).digest('hex');
+  return hashedToken === this.resetPasswordToken.token;
 };
-
 
 module.exports = mongoose.model("User", UserSchema);

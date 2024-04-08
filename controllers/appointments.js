@@ -13,25 +13,34 @@ exports.getAppointments = async (req, res, next) => {
       path: "hospital",
       select: "name province tel",
     });
-  } else { // Admin can see all appointments
-    query = Appointment.find({}).populate({
-      path: "hospital",
-      select: "name province tel",
-    });
-  }
+  }  else { //If you are an admin, you can see all!
+    if (req.params.hospitalId) {
+        console.log(req.params.hospitalId);
+        query = Appointment.find({hospital : req.params.hospitalId}).populate({
+            path: 'hospital',
+            select: 'name province tel'
+        });
+    } else {
+        query = Appointment.find().populate({
+            path: 'hospital',
+            select: 'name province tel'
+        });
+    }
+}
 
   try { // Execute query
     const appointments = await query;
-    res.status(200).json({
-      success: true,
-      count: appointments.length,
-      data: appointments,
-    });
-  } catch (error) { // Error handling
+      res.status(200).json({
+        success: true,
+        ount: appointments.length,
+        data: appointments
+    })
+  } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Cannot find Appointment" });
+    return res.status(500).json({
+      success: false,
+      message: "Cannot find Appointment"
+    })
   }
 };
 

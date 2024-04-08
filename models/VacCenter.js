@@ -11,7 +11,7 @@ VacCenter.getAll = (result) => {
 	sql.query("SELECT * FROM vacCenters;", (err, res) => {
 		if (err) {
 			console.log("error: ", err);
-			result(err, null);
+			result(null,err);
 			return;
 		}
 
