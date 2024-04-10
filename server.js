@@ -12,9 +12,7 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUI = require("swagger-ui-express");
 
 // Route files
-const hospitals = require("./routes/hospitals");
 const auth = require("./routes/auth");
-const appointments = require("./routes/appointments");
 const workspaces = require("./routes/workspaces"); // Import workspace route file
 const reservations = require("./routes/reservations"); // Import reservation route file
 
@@ -57,9 +55,7 @@ app.use(hpp());
 app.use(cors());
 
 // Mount routers
-app.use("/api/v1/hospitals", hospitals);
 app.use("/api/v1/auth", auth);
-app.use("/api/v1/appointments", appointments);
 app.use("/api/v1/workspaces", workspaces); // Mount workspace route file
 app.use("/api/v1/reservations", reservations); // Mount reservation route file
 
