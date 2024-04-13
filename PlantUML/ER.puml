@@ -1,4 +1,4 @@
-@startuml
+@startuml ER
 'set orthogonal line style
 skinparam linetype ortho
 

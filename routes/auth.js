@@ -96,9 +96,57 @@ router.get("/me", protect, getMe);
  */
 router.post("/logout", logout);
 
+/**
+ * @swagger
+ * /auth/send-otp:
+ *   get:
+ *     summary: Send OTP for email verification
+ *     description: Sends a one-time password to the user's email for verification purposes.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       401:
+ *         description: Authorization required
+ */
 router.get("/send-otp", protect, sendVerificationOTP); // Route to send OTP for email verification
+
+/**
+ * @swagger
+ * /auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP and update user status
+ *     description: Verifies the OTP sent to the user and updates their verification status.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OTP verified and user status updated
+ *       400:
+ *         description: Invalid OTP
+ */
 router.post("/verify-otp", protect, verifyOTP); // Route to verify OTP and update user status
 
+/**
+ * @swagger
+ * /auth/google:
+ *   get:
+ *     summary: Login with Google
+ *     description: Redirects to Google for user authentication.
+ *     responses:
+ *       302:
+ *         description: Redirect to Google's authentication page
+ */
 router.get("/google", async (req, res) => {
   try {
     res.redirect(utils.request_get_auth_code_url);
@@ -108,8 +156,52 @@ router.get("/google", async (req, res) => {
   }
 });
 router.get(process.env.REDIRECT_URI, loginWithGoogle);
-
+/**
+ * @swagger
+ * /auth/forgotpassword:
+ *   post:
+ *     summary: Forgot Password
+ *     description: Initiates a password reset process for the user.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset email sent
+ *       404:
+ *         description: Email not registered
+ */
 router.post("/forgotpassword", forgotPassword);
+
+/**
+ * @swagger
+ * /auth/resetpassword:
+ *   put:
+ *     summary: Reset Password
+ *     description: Allows the user to reset their password using a token received via email.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid token or password
+ */
 router.put("/resetpassword", resetPassword);
 
 module.exports = router;
