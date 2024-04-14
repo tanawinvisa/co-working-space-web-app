@@ -1,0 +1,25 @@
+@startuml
+actor User
+participant "Login System" as Login
+participant "Reservation System" as Reservation
+participant "Workspace System" as Workspace
+participant "Database" as DB
+
+User -> Login: Provide credentials
+Login -> User: Authentication success
+
+User -> Workspace: Request available workspaces
+Workspace -> DB: Query available workspaces
+DB -> Workspace: Return workspaces
+Workspace -> User: Display workspaces
+
+User -> Reservation: Select workspace and time
+Reservation -> DB: Check availability
+DB -> Reservation: Availability confirmed
+
+User -> Reservation: Confirm reservation
+Reservation -> DB: Create reservation entry
+DB -> Reservation: Reservation success
+Reservation -> User: Reservation confirmed
+
+@enduml
