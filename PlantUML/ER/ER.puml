@@ -1,0 +1,39 @@
+@startuml Co-Working Space Web App ER Diagram
+'set orthogonal line style
+skinparam linetype ortho
+
+entity "User" as e01 {
+    *user_id : int <<generated>>
+    --
+    *name : varchar
+    *email : varchar
+    *password : varchar
+    *role : varchar
+    isActive : boolean
+    createdAt : datetime
+}
+
+entity "Reservation" as e02 {
+    *reservation_id : int <<generated>>
+    --
+    *user_id : int <<FK>>
+    *workspace_id : int <<FK>>
+    *startTime : datetime
+    *endTime : datetime
+    createdAt : datetime
+}
+
+entity "Workspace" as e03 {
+    *workspace_id : int <<generated>>
+    --
+    *name : varchar
+    *location : varchar
+    capacity : int
+    amenities : text[]
+    createdAt : datetime
+}
+
+e01 |o..o{ e02
+e03 ||..o{ e02
+
+@enduml
