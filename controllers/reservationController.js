@@ -6,7 +6,7 @@ const Workspace = require("../models/WorkSpace");
 // @access  Private
 exports.getReservations = async (req, res, next) => {
   try {
-    if (req.user.role !== "admin" ) {
+    if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized to access this resource",
@@ -68,8 +68,13 @@ exports.getReservation = async (req, res, next) => {
       });
     }
     // Ensure the user making the request owns the reservation
-    console.log(reservation.user_id.toString(), req.user.role)
-    if (!(reservation.user_id.toString() === req.user.id || req.user.role.toString() === "admin")) {
+    console.log(reservation.user_id.toString(), req.user.role);
+    if (
+      !(
+        reservation.user_id.toString() === req.user.id ||
+        req.user.role.toString() === "admin"
+      )
+    ) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to access this reservation",
@@ -94,11 +99,14 @@ exports.getReservation = async (req, res, next) => {
 exports.createReservation = async (req, res, next) => {
   try {
     // Add user Id to req.body
-    console.log(req.body)
+    console.log(req.body);
     req.body.user = req.user.id;
 
     // Check if the user has already reserved 3 rooms with status "reserved"
-    const userReservations = await Reservation.find({ user_id: req.user.id, status: "reserved" });
+    const userReservations = await Reservation.find({
+      user_id: req.user.id,
+      status: "reserved",
+    });
     if (userReservations.length >= 3) {
       return res.status(400).json({
         success: false,
@@ -106,7 +114,7 @@ exports.createReservation = async (req, res, next) => {
       });
     }
 
-    const { date, workspace_id, startTime, endTime } = req.body;
+    const { date, workspace_id} = req.body;
 
     // Check if the workspace exists
     const workspace = await Workspace.findById(workspace_id);
@@ -114,6 +122,15 @@ exports.createReservation = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: "Workspace not found",
+      });
+    }
+    // Check if the reservation date and time is in the future
+    const currentDateTime = new Date();
+    console.log((new Date(date) > currentDateTime));
+    if ( !(new Date(date) > currentDateTime)) {
+      return res.status(400).json({
+        success: false,
+        message: "Reservation date and time must be the day in the future",
       });
     }
 
@@ -133,10 +150,8 @@ exports.createReservation = async (req, res, next) => {
     const reservation = await Reservation.create({
       user_id: req.user.id,
       workspace_id: workspace_id,
-      date,
+      date: new Date(date),
       status: "reserved", // Set status to "reserved"
-      startTime,
-      endTime,
     });
 
     res.status(201).json({
@@ -165,13 +180,23 @@ exports.updateReservation = async (req, res, next) => {
       });
     }
 
-    // Ensure the user making the request owns the reservation
-    if (reservation.user_id.toString() !== req.user.id) {
+    // Check if the requesting user is an admin
+    console.log(req.user.id ,reservation.user_id.toString())
+    if (!(reservation.user_id.toString() === req.user.id || req.user.role === "admin")) {
       return res.status(403).json({
         success: false,
-        message: "Not authorized to update this reservation",
+        message: "Not authorized to update this resource",
       });
     }
+
+    // Check if the updated reservation date is tomorrow or further in the future
+    if (req.body.date && !(new Date(req.body.date) >= new Date(new Date().setDate(new Date().getDate() + 1)))) {
+      return res.status(400).json({
+        success: false,
+        message: "Updated reservation date must be tomorrow or further in the future",
+      });
+    }
+    
 
     // Check if the reservation is "reserved"
     if (reservation.status !== "reserved") {
@@ -216,11 +241,11 @@ exports.deleteReservation = async (req, res, next) => {
       });
     }
 
-    // Ensure the user making the request owns the reservation
+    // Check if the requesting user is an admin
     if (!(reservation.user_id.toString() === req.user.id || req.user.role === "admin")) {
       return res.status(403).json({
         success: false,
-        message: "Not authorized to delete this reservation",
+        message: "Not authorized to delete this resource",
       });
     }
 

@@ -14,14 +14,16 @@ const ReservationSchema = new mongoose.Schema({
   date: {
     type: Date,
     required: [true, "Please specify the reservation date"],
-  },
-  startTime: {
-    type: String,
-    required: [true, "Please specify the start time"],
-  },
-  endTime: {
-    type: String,
-    required: [true, "Please specify the end time"],
+    validate: {
+      validator: function(value) {
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0); // Reset hours to midnight for comparison
+        const providedDate = new Date(value);
+        providedDate.setHours(0, 0, 0, 0); // Reset hours to midnight for comparison
+        return providedDate > currentDate;
+      },
+      message: "Reservation date must be tomorrow or further in the future"
+    }
   },
   status: {
     type: String,
