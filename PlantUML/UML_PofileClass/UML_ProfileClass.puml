@@ -1,0 +1,128 @@
+@startuml
+' Define stereotypes
+stereotype persistence
+stereotype service
+stereotype controller
+stereotype entity
+
+' Apply stereotypes to classes
+class User {
+    +String name
+    +String email
+}
+class Reservation {
+    +DateTime startTime
+    +DateTime endTime
+}
+class Workspace {
+    +String location
+    +int capacity
+}
+
+User -- Reservation : books >
+Reservation -- Workspace : uses >
+
+User <<entity>>
+Reservation <<entity>>
+Workspace <<entity>>
+
+class ReservationService {
+    +bookReservation()
+    +cancelReservation()
+}
+class UserService {
+    +registerUser()
+    +updateUser()
+}
+class WorkspaceService {
+    +addWorkspace()
+    +updateWorkspace()
+}
+
+ReservationService <<service>>
+UserService <<service>>
+WorkspaceService <<service>>
+
+class ReservationController {
+    +createReservation()
+    +deleteReservation()
+}
+class UserController {
+    +login()
+    +logout()
+}
+class WorkspaceController {
+    +listWorkspaces()
+}
+
+ReservationController <<controller>>
+UserController <<controller>>
+WorkspaceController <<controller>>
+@enduml
+
+' @startuml
+' ' Define stereotypes
+' stereotype persistence
+' stereotype service
+' stereotype controller
+' stereotype entity
+
+' ' Entity classes with more attributes and methods
+' class User {
+'     +String name
+'     +String email
+'     +String telephoneNumber
+'     +String password
+'     +Boolean isVerified
+'     +getSignedJwtToken(): String
+'     +matchPassword(password: String): Boolean
+' }
+' User <<entity>>
+
+' class Reservation {
+'     +Date date
+'     +String startTime
+'     +String endTime
+'     +String status
+' }
+' Reservation <<entity>>
+
+' class Workspace {
+'     +String name
+'     +String address
+'     +Integer capacity
+'     +String openingTime
+'     +String closingTime
+' }
+' Workspace <<entity>>
+
+' ' Controller classes with enhanced method details
+' class ReservationController {
+'     +createReservation(reservationDetails)
+'     +deleteReservation(reservationId)
+'     +updateReservation(reservationId, reservationDetails)
+'     +getReservation(reservationId)
+' }
+' ReservationController <<controller>>
+
+' class UserController {
+'     +login(credentials)
+'     +logout()
+'     +registerUser(userDetails)
+'     +updateUser(userId, userDetails)
+'     +deleteUser(userId)
+' }
+' UserController <<controller>>
+
+' class WorkspaceController {
+'     +listWorkspaces()
+'     +addWorkspace(workspaceDetails)
+'     +updateWorkspace(workspaceId, workspaceDetails)
+'     +deleteWorkspace(workspaceId)
+' }
+' WorkspaceController <<controller>>
+
+' ' Relationships with cardinalities
+' User "1" -- "*" Reservation : books >
+' Reservation "*" -- "1" Workspace : uses >
+' @enduml

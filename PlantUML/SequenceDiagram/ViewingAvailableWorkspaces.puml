@@ -1,0 +1,20 @@
+@startuml Viewing Available Workspaces
+
+title Viewing Available Workspaces
+
+participant "Client" as client
+participant "Server" as server
+participant "Workspace Controller" as workspaceCtrl
+participant "Workspace Model" as workspaceModel
+database "Database" as db
+
+client -> server: GET /workspaces
+server -> workspaceCtrl: getAvailableWorkspaces()
+workspaceCtrl -> workspaceModel: findAll()
+workspaceModel -> db: query available workspaces
+db -> workspaceModel: return workspaces
+workspaceModel -> workspaceCtrl: workspaces list
+workspaceCtrl -> server: response (workspaces)
+server -> client: response (list of workspaces)
+
+@enduml

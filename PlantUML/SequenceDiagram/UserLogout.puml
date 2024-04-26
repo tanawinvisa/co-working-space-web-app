@@ -1,0 +1,11 @@
+@startuml Co-Working Space User Logout
+
+title User Logout Process
+
+participant "Client" as client
+participant "Server" as server
+
+client -> server: GET /auth/logout
+server -> client: response (logout success)
+
+@enduml

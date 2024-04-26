@@ -1,0 +1,20 @@
+@startuml Updating a Workspace Booking
+
+title Updating a Workspace Booking
+
+participant "Client" as client
+participant "Server" as server
+participant "Booking Controller" as bookingCtrl
+participant "Booking Model" as bookingModel
+database "Database" as db
+
+client -> server: PUT /bookings/{id}
+server -> bookingCtrl: updateBooking(id, newDetails)
+bookingCtrl -> bookingModel: updateById(id, newDetails)
+bookingModel -> db: update booking
+db -> bookingModel: success
+bookingModel -> bookingCtrl: update confirmed
+bookingCtrl -> server: response (update success)
+server -> client: response (updated booking details)
+
+@enduml

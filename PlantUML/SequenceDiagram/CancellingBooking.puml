@@ -1,0 +1,20 @@
+@startuml Cancelling a Workspace Booking
+
+title Cancelling a Workspace Booking
+
+participant "Client" as client
+participant "Server" as server
+participant "Booking Controller" as bookingCtrl
+participant "Booking Model" as bookingModel
+database "Database" as db
+
+client -> server: DELETE /bookings/{id}
+server -> bookingCtrl: cancelBooking(id)
+bookingCtrl -> bookingModel: deleteById(id)
+bookingModel -> db: remove booking
+db -> bookingModel: success
+bookingModel -> bookingCtrl: cancellation confirmed
+bookingCtrl -> server: response (cancellation success)
+server -> client: response (booking cancelled)
+
+@enduml
