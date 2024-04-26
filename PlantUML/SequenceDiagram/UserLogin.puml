@@ -2,19 +2,26 @@
 
 title User Login Process
 
-participant "Client" as client
+participant "User" as user
 participant "Server" as server
 participant "Auth Controller" as auth
 participant "User Model" as userModel
 database "Database" as db
 
-client -> server: POST /auth/login
+user -> server: POST /auth/login
 server -> auth: login(credentials)
 auth -> userModel: findUserByEmail(email)
 userModel -> db: query user by email
-db -> userModel: return user data
-userModel -> auth: validatePassword(password)
-auth -> server: response (token or error)
-server -> client: response (login success or failure)
+
+alt user found and password correct
+    db -> userModel: return user data
+    userModel -> auth: validatePassword(password)
+    auth -> server: response (token)
+    server -> user: response (login success)
+else user not found or password incorrect
+    userModel -> auth: login failed
+    auth -> server: response (error)
+    server -> user: response (login failed)
+end
 
 @enduml

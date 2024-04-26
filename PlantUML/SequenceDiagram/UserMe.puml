@@ -1,0 +1,27 @@
+@startuml Retrieving User Profile Information
+
+title Retrieving User Profile Information
+
+participant "User" as user
+participant "Server" as server
+participant "User Controller" as userCtrl
+participant "User Model" as userModel
+database "Database" as db
+
+user -> server: GET /users/me
+server -> userCtrl: getUserDetails(userId)
+userCtrl -> userModel: findById(userId)
+
+alt user found
+    userModel -> db: query user by ID
+    db -> userModel: return user data
+    userModel -> userCtrl: user details
+    userCtrl -> server: response (user details)
+    server -> user: response (profile details)
+else user not found
+    userModel -> userCtrl: user not found
+    userCtrl -> server: response (error)
+    server -> user: response (user not found)
+end
+
+@enduml

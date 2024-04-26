@@ -1,0 +1,27 @@
+@startuml Co-Working Space User Registration
+
+title User Registration Process
+
+participant "User" as user
+participant "Server" as server
+participant "Auth Controller" as auth
+participant "User Model" as userModel
+database "Database" as db
+
+user -> server: POST /auth/register
+server -> auth: register(userData)
+auth -> userModel: create(userData)
+
+alt validation successful
+    userModel -> db: insert user data
+    db -> userModel: success
+    userModel -> auth: user created
+    auth -> server: response (success)
+    server -> user: response (user registered)
+else validation failed
+    userModel -> auth: validation error
+    auth -> server: response (error)
+    server -> user: response (registration failed)
+end
+
+@enduml

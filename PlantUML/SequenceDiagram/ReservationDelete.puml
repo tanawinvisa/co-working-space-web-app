@@ -1,0 +1,27 @@
+@startuml Co-Working Space Reservation (DELETE)
+
+header Co-Working Space Delete Sequence Diagram
+title "Co-Working Space Reservation (DELETE)"
+
+participant "User" as user
+participant "<<javaScript>>:server" as server
+participant "<<router>>:reservations" as routerReservations
+participant "<<controllers>>:reservations" as controllersReservations
+participant "<<model>>:Reservation" as modelReservation
+database "<<MongoDB>>:reservations" as ReservationsDatabase
+
+user->server ++:req.delete('/reservations/:id')
+server->routerReservations ++:app.use('/reservations/:id',reservations)
+routerReservations -> controllersReservations ++:deletereservation(req)
+
+alt reservation ID exists and admin is authorized
+    controllersReservations->modelReservation ++:findByIdAndDelete(req.params.id)
+    modelReservation ->ReservationsDatabase ++: Delete reservation data
+    ReservationsDatabase --> modelReservation --: deleted reservation data
+    controllersReservations <-- modelReservation --:deleted reservation data
+    controllersReservations->user --:success : true
+else reservation ID does not exist or admin not authorized
+    controllersReservations -> user --:success : false
+end
+
+@enduml

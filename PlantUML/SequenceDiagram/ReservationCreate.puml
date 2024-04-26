@@ -1,0 +1,27 @@
+@startuml Making a Reservation
+
+title Making a Reservation
+
+participant "User" as user
+participant "Server" as server
+participant "Reservation Controller" as reservationCtrl
+participant "Reservation Model" as reservationModel
+database "Database" as db
+
+user -> server: POST /reservations
+server -> reservationCtrl: createReservation(reservationData)
+reservationCtrl -> reservationModel: create(reservationData)
+
+alt reservation successful
+    reservationModel -> db: insert reservation
+    db -> reservationModel: success
+    reservationModel -> reservationCtrl: reservation confirmed
+    reservationCtrl -> server: response (reservation success)
+    server -> user: response (reservation details)
+else reservation failed
+    reservationModel -> reservationCtrl: reservation error
+    reservationCtrl -> server: response (error)
+    server -> user: response (reservation failed)
+end
+
+@enduml

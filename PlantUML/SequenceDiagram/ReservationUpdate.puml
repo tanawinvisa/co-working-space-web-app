@@ -1,0 +1,27 @@
+@startuml Updating a Reservation
+
+title Updating a Reservation
+
+participant "User" as user
+participant "Server" as server
+participant "Reservation Controller" as reservationCtrl
+participant "Reservation Model" as reservationModel
+database "Database" as db
+
+user -> server: PUT /reservations/{id}
+server -> reservationCtrl: updateReservation(id, newDetails)
+reservationCtrl -> reservationModel: updateById(id, newDetails)
+
+alt update successful
+    reservationModel -> db: update reservation
+    db -> reservationModel: success
+    reservationModel -> reservationCtrl: update confirmed
+    reservationCtrl -> server: response (update success)
+    server -> user: response (updated reservation details)
+else update failed
+    reservationModel -> reservationCtrl: update error
+    reservationCtrl -> server: response (error)
+    server -> user: response (reservation update failed)
+end
+
+@enduml

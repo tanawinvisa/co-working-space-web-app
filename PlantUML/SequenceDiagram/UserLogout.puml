@@ -2,10 +2,15 @@
 
 title User Logout Process
 
-participant "Client" as client
+participant "User" as user
 participant "Server" as server
 
-client -> server: GET /auth/logout
-server -> client: response (logout success)
+user -> server: GET /auth/logout
+
+alt already authorized
+    server -> user: response (logout success)
+else not authorized
+    server -> user: response (logout failed)
+end
 
 @enduml
