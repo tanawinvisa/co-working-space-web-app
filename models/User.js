@@ -84,24 +84,41 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 // Generate and hash password reset token
-UserSchema.methods.getResetPasswordToken = function () {
+UserSchema.methods.getResetPasswordToken =  async function () {
   // Generate token
   const resetToken = crypto.randomBytes(20).toString('hex');
 
   // Hash token and set to resetPasswordToken field
-  this.resetPasswordToken = {
-    token: crypto.createHash('sha256').update(resetToken).digest('hex'),
-    expiresAt: Date.now() + 10 * 60 * 1000 // 10 minute expire
+  console.log("resetToken", resetToken);
+  const salt = await bcrypt.genSalt(10);
+  const hashedResetToken = await bcrypt.hash(resetToken, salt);
+
+  // Set the reset token and its expiration time in the update object
+  const update = {
+    $set: {
+      resetPasswordToken: {
+        token: hashedResetToken,
+        expiresAt: Date.now() + 5 * 60 * 1000, // Token expires in 5 minutes
+      }
+    }
   };
+  // Update the user document with the reset token
+  await this.model('User').findOneAndUpdate(
+    { _id: this._id },
+    update,
+    { new: true } // To return the updated document
+  );
+
+  // Return the generated reset token
+  // console.log("hashedResetToken", hashedResetToken)
 
   // Return plain token
   return resetToken;
 };
 
 // Match resetPasswordToken from the user input with the hashed one in database
-UserSchema.methods.matchResetPasswordToken = function (enteredToken) {
-  const hashedToken = crypto.createHash('sha256').update(enteredToken).digest('hex');
-  return hashedToken === this.resetPasswordToken.token;
+UserSchema.methods.matchResetPasswordToken = async function (enteredToken) {
+  return await bcrypt.compare(enteredToken, this.resetPasswordToken.token);
 };
 
 module.exports = mongoose.model("User", UserSchema);

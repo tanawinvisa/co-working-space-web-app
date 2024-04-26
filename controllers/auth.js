@@ -237,7 +237,7 @@ exports.sendVerificationOTP = async (req, res, next) => {
     const otpObject = {value: otp, expiresAt: new Date(Date.now() + 300000)}; // OTP expires in 5 minutes
     await User.updateOne({ email }, { otp: otpObject });
     
-    res.status(200).json({ success: true, message: 'OTP sent successfully', otp });
+    res.status(200).json({ success: true, message: 'OTP sent successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Unable to send OTP' });
@@ -284,8 +284,8 @@ exports.forgotPassword = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const resetToken = await user.generateResetToken(email); // Implement this function
-    // console.log(resetToken);
+    const resetToken = await user.getResetPasswordToken(email); // Implement this function
+    console.log(resetToken);
 
     const resetUrl = `http://localhost:5000/api/v1/auth/resetPassword?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(email)}`;
     await sendEmail(email, 'Password Reset Request', `Click here to reset your password: ${resetUrl}`);
@@ -304,7 +304,7 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const token = decodeURIComponent(req.query.token);
     const email = decodeURIComponent(req.query.email);
-    // console.log(token,email)
+    console.log(token,email)
     const { newPassword } = req.body;
     const user = await User.findOne({ email });
 
